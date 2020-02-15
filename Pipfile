@@ -1,0 +1,28 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+black = "*"
+blackcellmagic = "*"
+
+[packages]
+pandas = "*"
+numpy = "*"
+matplotlib = "*"
+ipykernel = "*"
+openpyxl = "*"
+plotly = "*"
+ipywidgets = "*"
+ipython = "*"
+sqlalchemy = "*"
+pymysql = "*"
+jupyter = "*"
+requests = "*"
+
+[requires]
+python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
