@@ -20,11 +20,13 @@ session = Session(engine)
 @app.route("/")
 def home():
     return (
-        f"Welcome!<br/>"
-        f"Available Routes:<br/>"
-        f"<a href = ../api/v1.0/precipitation>Precipitation</a> <br/>"
-        f"<a href = ../api/v1.0/stations>Station</a> <br/>"
-        f"<a href = ../api/v1.0/tobs>Temprature Observations</a> <br/>"
+        f"<h1>Welcome!</h1><br/>"
+        f"<h3>Available Routes:</h3><br/>"
+        f"<a href = ../api/v1.0/precipitation>Precipitation Observations</a> <br/>"
+        f"<a href = ../api/v1.0/stations>Sation List</a> <br/>"
+        f"<a href = ../api/v1.0/tobs>Temprature Observations</a><br/>"
+        f"<a href = ../api/v1.0/2016-08-26>Temprature Observartion Summary Starting 2016-08-26</a><br/>"
+        f"<a href = ../api/v1.0/2015-08-26/2016-08-26>Temprature Observartion Summary From 2015-08-26 To 2016-08-26</a><br/>"
     )
 
 
@@ -88,12 +90,75 @@ def tobs():
         {
             "observation_date": temp_ob[0],
             "station_id": temp_ob[1],
-            "station_name": temp_ob[1],
-            "temp_observation": temp_ob[2],
+            "station_name": temp_ob[2],
+            "temp_observation": temp_ob[3],
         }
         for temp_ob in temp_obs
     ]
     return jsonify(tobs_dict)
+
+
+@app.route("/api/v1.0/<start_date>")
+def temp_start(start_date):
+    """TMIN, TAVG, and TMAX for a list of dates.
+    
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+    temp_smry = (
+        session.query(
+            func.min(Measurement.tobs),
+            func.avg(Measurement.tobs),
+            func.max(Measurement.tobs),
+        )
+        .filter(Measurement.date >= start_date)
+        .all()
+    )
+    temp_smry_dict = [
+        {
+            "min_temprature": obs[0],
+            "average_temprature": obs[1],
+            "max_temprature": obs[2],
+        }
+        for obs in temp_smry
+    ]
+    return jsonify(temp_smry_dict)
+
+
+@app.route("/api/v1.0/<start_date>/<end_date>")
+def temp_range(start_date, end_date):
+    """TMIN, TAVG, and TMAX for a list of dates.
+    
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+    temp_smry = (
+        session.query(
+            func.min(Measurement.tobs),
+            func.avg(Measurement.tobs),
+            func.max(Measurement.tobs),
+        )
+        .filter(Measurement.date >= start_date)
+        .filter(Measurement.date <= end_date)
+        .all()
+    )
+    temp_smry_dict = [
+        {
+            "min_temprature": obs[0],
+            "average_temprature": obs[1],
+            "max_temprature": obs[2],
+        }
+        for obs in temp_smry
+    ]
+    return jsonify(temp_smry_dict)
 
 
 if __name__ == "__main__":
